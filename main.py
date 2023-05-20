@@ -23,14 +23,22 @@ class EDA():
             f = self.file_path.split('/')[-1].split('.')
             filename = f[0]
             extension = f[1]
-            df = pd.read_excel(self.file_path) if extension in ['xlsx','xls'] else pd.read_csv(self.file_path)
-            # messagebox.showinfo("Columns",str(df.columns))
+            self.df = pd.read_excel(self.file_path) if extension in ['xlsx','xls'] else pd.read_csv(self.file_path)
+            
 
             if self.file_path:
                 # Code to determine dependent and independent variables
-                df = self.feature_engineering(df)
+                self.select_columns()
                 # Code for data cleaning
-                df = self.check_clean(df)
+                print(self.df.head(8))
+                self.lbl_clean_data = ttk.Label(self.root,text="Enter character to remove from column values")
+                self.lbl_clean_data.grid(row=20,column=1)
+                self.strip_val = ttk.Entry(self.root)
+                self.strip_val.grid(row=20,column=3)
+                self.btn_clean = ttk.Button(self.root,text="Clean!!!",command=self.check_clean)
+                self.btn_clean.grid(row=21,column=3)
+                
+                
                 # Code to check for missing data
                 df = self.check_missing_data(df)
                 # Code to check if data is normal
@@ -38,11 +46,13 @@ class EDA():
             
         except Exception as e:
             print(e)
-    def feature_engineering(self,df):
+
+    def select_columns(self):
         messagebox.showinfo("Information:","Select COLUMNS for DEPENDENT VARIABLE(y):")
         self.dep_var_label = ttk.Label(self.root,text="Select dependent/target variable:")
         self.dep_var_label.grid(row=1,column=1)
-        self.dependent_var = ttk.Combobox(self.root,values=df.columns)
+        self.cols_list = [col for col in self.df.columns]
+        self.dependent_var = ttk.Combobox(self.root,values=self.cols_list)
         self.dependent_var.grid(row=1,column=3)
 
         self.indep_var_label = ttk.Label(self.root,text="Select independent variable(X):")
@@ -52,21 +62,27 @@ class EDA():
         self.CheckButton = []
         # messagebox.showinfo("info",len(df.columns))
         try:
-            for i in range(0,len(df.columns)):
+            for i in range(0,len(self.df.columns)):
                 self.checkButtonVal.append(IntVar())
-                self.CheckButton.append(ttk.Checkbutton(self.root,text=df.columns[i],onvalue=1,offvalue=0,
+                self.CheckButton.append(ttk.Checkbutton(self.root,text=self.df.columns[i],onvalue=1,offvalue=0,
                                                       variable=self.checkButtonVal[i],width=20,command=lambda:self.toggleCheck(i)))
                 self.CheckButton[i].grid(row=i+2,column=3)
         except Exception as e:
-            traceback.print_exc()    
+            traceback.print_exc() 
 
+        
     def toggleCheck(self,i):
         self.checkButtonVal[i] = not self.checkButtonVal[i]
+
+
+    def check_clean(self):                
+        for col in self.df.columns:
+            if self.df[col].dtype == 'object':
+                self.df[col] = self.df[col].apply(lambda x:x.strip(self.strip_val.get()))
+        print(self.df.head(8))
+
         
 
-    
-    def check_clean(self,df):
-        pass
     
     def check_missing_data(self,df):
         pass
