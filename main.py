@@ -1,10 +1,10 @@
-from tkinter import ttk
+from tkinter import IntVar, ttk
 from tkinter import Tk
 from tkinter import filedialog
 from tkinter import messagebox
 import pandas as pd
 import numpy as np
-
+import traceback
 class EDA():
     def __init__(self):
         self.root = Tk()
@@ -26,15 +26,43 @@ class EDA():
             df = pd.read_excel(self.file_path) if extension in ['xlsx','xls'] else pd.read_csv(self.file_path)
             # messagebox.showinfo("Columns",str(df.columns))
 
-            # Code to check if data requires cleaning
-            df = self.check_clean(df)
-            # Code to check for missing data
-            df = self.check_missing_data(df)
-            # Code to check if data is normal
-            df = self.check_normality(df)
+            if self.file_path:
+                # Code to determine dependent and independent variables
+                df = self.feature_engineering(df)
+                # Code for data cleaning
+                df = self.check_clean(df)
+                # Code to check for missing data
+                df = self.check_missing_data(df)
+                # Code to check if data is normal
+                df = self.check_normality(df)
             
         except Exception as e:
             print(e)
+    def feature_engineering(self,df):
+        messagebox.showinfo("Information:","Select COLUMNS for DEPENDENT VARIABLE(y):")
+        self.dep_var_label = ttk.Label(self.root,text="Select dependent/target variable:")
+        self.dep_var_label.grid(row=1,column=1)
+        self.dependent_var = ttk.Combobox(self.root,values=df.columns)
+        self.dependent_var.grid(row=1,column=3)
+
+        self.indep_var_label = ttk.Label(self.root,text="Select independent variable(X):")
+        self.indep_var_label.grid(row=2,column=1)
+
+        self.checkButtonVal = []
+        self.CheckButton = []
+        # messagebox.showinfo("info",len(df.columns))
+        try:
+            for i in range(0,len(df.columns)):
+                self.checkButtonVal.append(IntVar())
+                self.CheckButton.append(ttk.Checkbutton(self.root,text=df.columns[i],onvalue=1,offvalue=0,
+                                                      variable=self.checkButtonVal[i],width=20,command=lambda:self.toggleCheck(i)))
+                self.CheckButton[i].grid(row=i+2,column=3)
+        except Exception as e:
+            traceback.print_exc()    
+
+    def toggleCheck(self,i):
+        self.checkButtonVal[i] = not self.checkButtonVal[i]
+        
 
     
     def check_clean(self,df):
