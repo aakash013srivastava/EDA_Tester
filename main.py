@@ -71,7 +71,8 @@ class EDA():
         self.checkButtonVal = []
         self.CheckButton = []
         self.lbl_dtypes = []
-
+    
+        
         try:
             for i in range(0,len(self.df.columns)):
                 self.checkButtonVal.append(IntVar())
@@ -108,12 +109,14 @@ class EDA():
         
         self.convert_dtype_dropdown = ttk.Combobox(self.root,values = ['float64','int64','object'])
         self.convert_dtype_dropdown.grid(row=len(self.df.columns)+6,column=3)
-        self.convert_dtype_btn = ttk.Button(self.root,text="Convert!",command=self.converter)
+        self.convert_dtype_btn = ttk.Button(self.root,text="Convert!",command=lambda:self.converter(self.convert_dtype_dropdown))
         self.convert_dtype_btn.grid(row=len(self.df.columns)+7,column=3)
 
     
-    def converter(self):
-        self.df[self.convert_dropdown.get()] = pd.to_numeric(self.df[self.convert_dropdown.get()])
+    def converter(self,datatype):
+        if datatype != 'object':
+            self.df[self.convert_dropdown.get()] = pd.to_numeric(self.df[self.convert_dropdown.get()])
+            messagebox.showinfo("Dtype:",str(self.df[self.convert_dropdown.get()].dtype))
         
 
     def check_missing_data(self):
