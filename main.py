@@ -6,6 +6,7 @@ from tkinter import messagebox
 import pandas as pd
 import numpy as np
 from scipy.stats import normaltest,shapiro,boxcox
+from sklearn.preprocessing import StandardScaler
 import traceback
 class EDA():
     def __init__(self):
@@ -151,16 +152,19 @@ class EDA():
 
 
     def logTranx(self):
+        self.df = self.standardizeData(self.df)
         self.df[self.dependent_var.get()+'_log'] = np.log(self.df[self.dependent_var.get()])
         self.lbl_p.set(normaltest(self.df[[self.dependent_var.get()+'_log']])[1])
         self.latest_tranx = 'log'
 
     def sqrtTranx(self):
+        self.df = self.standardizeData(self.df)
         self.df[self.dependent_var.get()+'_sqrt'] = np.sqrt(self.df[self.dependent_var.get()])
         self.lbl_p.set(normaltest(self.df[[self.dependent_var.get()+'_sqrt']])[1])
         self.latest_tranx = 'sqrt'
 
     def boxcoxTranx(self):
+        self.df = self.standardizeData(self.df)
         k2,b = boxcox(self.df[self.dependent_var.get()])
         self.lbl_p.set(normaltest(self.df[[self.dependent_var.get()]])[1])
         self.latest_tranx = 'boxcox'
@@ -170,5 +174,10 @@ class EDA():
         self.df.to_csv("exported.csv")
 
         messagebox.showinfo("Result:","Check File in working directory")
+
+    def standardizeData(self,df):
+        s = StandardScaler()
+        df_s = s.fit_transform(df[[self.dependent_var.get()]])
+        return self.df
 
 EDA()
